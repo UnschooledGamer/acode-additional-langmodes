@@ -1,0 +1,157 @@
+@top Script { Element* }
+
+@precedence {
+  functionDeclaration @left,
+  functionOrCall @left,
+  classDeclaration @left
+}
+
+Element {
+  LineComment |
+  BlockComment |
+  String |
+  Number |
+  Directive |
+  HotstringDeclaration |
+  HotkeyDeclaration |
+  ClassDeclaration |
+  FunctionDeclaration |
+  FunctionCall |
+  LabelOrProperty |
+  Block |
+  Parenthesized |
+  Bracketed |
+  Boolean |
+  ControlKeyword |
+  DefinitionKeyword |
+  BuiltinFunction |
+  Command |
+  BuiltinVariable |
+  PercentVariable |
+  Operator |
+  Punctuation |
+  Identifier
+}
+
+Directive { "#" Identifier }
+HotstringDeclaration { HotstringHeader }
+HotkeyDeclaration { HotkeyHeader }
+
+ClassDeclaration {
+  classKw Identifier (extendsKw Identifier)? !classDeclaration Block
+}
+
+FunctionDeclaration {
+  Identifier !functionOrCall ArgumentList !functionDeclaration Block
+}
+FunctionCall { Identifier !functionOrCall ArgumentList }
+
+ArgumentList { "(" Element* ")" }
+Block { "{" Element* "}" }
+Parenthesized { "(" Element* ")" }
+Bracketed { "[" Element* "]" }
+LabelOrProperty { Identifier ":" }
+
+Boolean { trueKw | falseKw }
+ControlKeyword {
+  ifKw | elseKw | forKw | inKw | whileKw | loopKw | untilKw |
+  tryKw | catchKw | finallyKw | switchKw | caseKw | defaultKw |
+  returnKw | throwKw | breakKw | continueKw | exitKw | exitAppKw |
+  newKw | andKw | orKw | notKw
+}
+DefinitionKeyword { globalKw | localKw | staticKw | byRefKw }
+BuiltinFunction { BuiltinFunctionName }
+Command { CommandName }
+BuiltinVariable { BuiltinVariableName }
+PercentVariable { PercentIdentifier }
+Operator { OperatorToken }
+Punctuation { PunctuationToken }
+
+@tokens {
+  whitespace { $[ \t\r\n]+ }
+  LineComment { ";" ![\n\r]* }
+  BlockComment { "/*" blockCommentContent* ("*/" | "") }
+  blockCommentContent { ![*] | "*" ![/] }
+
+  String {
+    '"' ( '""' | "`" ![\n\r] | !["\n\r] )* ('"' | "") |
+    "'" ( "`" ![\n\r] | !['\n\r] )* ("'" | "")
+  }
+
+  Number {
+    ("0x" | "0X") $[0-9a-fA-F]+ |
+    ("0b" | "0B") $[01]+ |
+    @digit+ ("." @digit*)? ($[eE] $[+-]? @digit+)? |
+    "." @digit+ ($[eE] $[+-]? @digit+)?
+  }
+
+  HotstringHeader { ":" $[A-Za-z0-9*?+\-]* ":" ![:\n\r]+ "::" }
+  HotkeyHeader { $[~*$<>!^+#&A-Za-z0-9_] $[~*$<>!^+#&A-Za-z0-9_ \t]* "::" }
+  PercentIdentifier { "%" $[A-Za-z_@$] $[A-Za-z0-9_#@$]* "%"? }
+  BuiltinVariableName { $[Aa] "_" $[A-Za-z0-9_]+ }
+  Identifier { $[A-Za-z_@$] $[A-Za-z0-9_#@$]* }
+
+  OperatorToken {
+    ":=" | ".=" | "+=" | "-=" | "*=" | "/=" | "//=" | "|=" | "&=" |
+    "^=" | ">>=" | "<<=" | "=>" | "**" | "++" | "--" | "&&" | "||" |
+    "==" | "!=" | "<>" | "~=" | "<=" | ">=" | "//" |
+    "+" | "-" | "*" | "/" | "%" | "<" | ">" | "=" | "!" | "~" |
+    "&" | "|" | "^" | "?" | "."
+  }
+  PunctuationToken { "," | "`" }
+
+  "(" ")" "[" "]" "{" "}" ":" "#"
+  @precedence {
+    LineComment,
+    BlockComment,
+    String,
+    HotstringHeader,
+    HotkeyHeader,
+    Number,
+    BuiltinVariableName,
+    PercentIdentifier,
+    Identifier,
+    OperatorToken,
+    PunctuationToken
+  }
+}
+
+@external specialize { Identifier } specializeIdentifier from "./specialize.js" {
+  BuiltinFunctionName,
+  CommandName,
+  classKw,
+  extendsKw,
+  ifKw,
+  elseKw,
+  forKw,
+  inKw,
+  whileKw,
+  loopKw,
+  untilKw,
+  tryKw,
+  catchKw,
+  finallyKw,
+  switchKw,
+  caseKw,
+  defaultKw,
+  globalKw,
+  localKw,
+  staticKw,
+  byRefKw,
+  returnKw,
+  throwKw,
+  breakKw,
+  continueKw,
+  exitKw,
+  exitAppKw,
+  newKw,
+  trueKw,
+  falseKw,
+  andKw,
+  orKw,
+  notKw
+}
+
+@skip { whitespace }
+
+@detectDelim
