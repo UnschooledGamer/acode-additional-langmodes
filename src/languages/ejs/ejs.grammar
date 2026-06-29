@@ -1,14 +1,10 @@
-@top Template { (Text | EjsTag | EscapedTag)* }
+@top Template { (EjsComment | HtmlComment | Text | EjsTag | EscapedTag)* }
 
 EjsTag {
-  EjsComment |
   EjsExpression |
   EjsBlock
 }
 
-EjsComment {
-  CommentStart Content? TagEnd
-}
 
 EjsExpression {
   ExprStart Content? TagEnd
@@ -22,8 +18,11 @@ EscapedTag {
   LiteralStart
 }
 
+@external tokens ejsComment from "./tokens.js" {
+  EjsComment
+}
+
 @tokens {
-  CommentStart { "<%#" }
   ExprStart { "<%" ("=" | "-") }
   BlockStart { "<%" "_"? }
   LiteralStart { "<%%" }
@@ -33,11 +32,12 @@ EscapedTag {
 
   TagEnd { ("-" | "_")? "%>" }
 
-  Text { (![<] | "<" ![%])+ }
+  HtmlComment { "<!--" (![-] | "-" ![-] | "--" ![>])* "-->" }
+
+  Text { (![<] | "<" ![%!])+ }
 
   @precedence {
     LiteralStart,
-    CommentStart,
     ExprStart,
     BlockStart
   }
