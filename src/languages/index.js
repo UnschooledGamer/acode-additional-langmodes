@@ -1,7 +1,10 @@
+import { asciidocMode } from "./asciidoc";
+import { assemblyMode } from "./assembly";
 import { autoHotkeyMode } from "./autohotkey";
 import { communityLanguageModes } from "./community";
 import { gitignoreMode } from "./gitignore";
 import { zigMode } from "./zig";
+import { jsoncMode } from "./jsonc";
 
 import { ejsMode } from "./ejs"
 
@@ -11,9 +14,12 @@ import { ejsMode } from "./ejs"
  * lifecycle code.
  */
 export const languageModes = [
+	asciidocMode,
+	assemblyMode,
 	autoHotkeyMode,
 	zigMode,
 	gitignoreMode,
+	jsoncMode,
 	...communityLanguageModes,
   ejsMode,
 ];

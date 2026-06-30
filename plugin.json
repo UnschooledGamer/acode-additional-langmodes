@@ -12,9 +12,12 @@
         "codemirror",
         "language",
         "syntax",
+        "asciidoc",
+        "assembly",
         "autohotkey",
         "zig",
-        "svelte"
+        "svelte",
+        "jsonc"
     ],
     "price": 0,
     "permissions": [],

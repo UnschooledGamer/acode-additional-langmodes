@@ -118,6 +118,67 @@ for (const sample of autoHotkeySamples) {
 
 console.log(`Validated ${autoHotkeySamples.length} AutoHotkey parser fixtures.`);
 
+// Test JSONC Parser
+const { parser: jsoncParser } = await bundledRequire(
+	"src/languages/jsonc/parser.js",
+	"acode-jsonc-parser-test.cjs",
+);
+
+const jsoncSamples = [
+	{
+		name: "JSON with comments and trailing commas",
+		source: `{
+			// Line comment
+			"name": "Acode",
+			/* Block comment */
+			"features": [
+				"syntax highlighting",
+				"git support",
+			],
+			"config": {
+				"active": true,
+				"version": 1.0,
+				"meta": null
+			}
+		}`,
+		nodes: [
+			"LineComment",
+			"BlockComment",
+			"PropertyName",
+			"String",
+			"Array",
+			"Object",
+			"Property",
+			"True",
+			"Number",
+			"Null",
+		],
+	},
+];
+
+for (const sample of jsoncSamples) {
+	const tree = jsoncParser.parse(sample.source);
+	const names = new Set();
+	const errors = [];
+
+	tree.iterate({
+		enter(node) {
+			names.add(node.name);
+			if (node.type.isError) {
+				errors.push([node.from, node.to]);
+			}
+		},
+	});
+
+	assert.equal(errors.length, 0, `${sample.name} produced parse errors`);
+	assert.equal(tree.length, sample.source.length, `${sample.name} was not fully parsed`);
+	for (const node of sample.nodes) {
+		assert(names.has(node), `${sample.name} did not produce ${node}`);
+	}
+}
+
+console.log(`Validated ${jsoncSamples.length} JSONC parser fixtures.`);
+
 const { parser: ejsParser } = await bundledRequire(
 	"src/languages/ejs/parser.js",
 	"acode-ejs-parser-test.cjs",
