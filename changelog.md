@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1
+
+- Added gitattributes modes and fixed indentation issue of ejs mode
+
 ## 1.1.0
 
 - Added new modes:
