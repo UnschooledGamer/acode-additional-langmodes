@@ -271,6 +271,19 @@ function enter(doc, extensions = []) {
 		to: state.doc.line(6).from,
 	});
 }
+{
+	const source = "<main>\n</main>";
+	const state = EditorState.create({
+		doc: source,
+		selection: EditorSelection.cursor(source.indexOf("\n")),
+		extensions: [ejs(), indentUnit.of("  ")],
+	});
+	syntaxTree(state);
+	let transaction = null;
+	insertNewlineAndIndent({ state, dispatch(tr) { transaction = tr; } });
+	const line = transaction.newDoc.lineAt(transaction.newSelection.main.head);
+	assert.equal(line.text, "  ");
+}
 
 
 {
@@ -290,6 +303,11 @@ function enter(doc, extensions = []) {
 	syntaxTree(state);
 	const transaction = state.update({ changes: [{ from: 3, insert: "2" }, { from: 8, insert: "2" }] });
 	assert.equal(transaction.newDoc.toString(), "<h22></h22>");
+}
+{
+	const state = EditorState.create({ doc: "<main></main", extensions: [ejs()] });
+	syntaxTree(state);
+	assert.equal(state.update({ changes: { from: 12, insert: ">" } }).newDoc.toString(), "<main></main>");
 }
 
 {

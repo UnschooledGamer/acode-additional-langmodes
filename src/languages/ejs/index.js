@@ -128,7 +128,7 @@ function ejsIndentAt(state, pos, simulatedBreak) {
   }
 
   const opener = stack[stack.length - 1];
-  return opener ? columnAt(state, opener.from + 2) : 0;
+  return opener ? columnAt(state, opener.from + 2) : undefined;
 }
 
 function ejsFold(state, lineStart, lineEnd) {
@@ -217,7 +217,8 @@ const htmlTagNameSync = EditorState.transactionFilter.of((transaction) => {
 
   const mirrored = [];
   transaction.changes.iterChanges((fromA, toA, _fromB, _toB, inserted) => {
-    if (inserted.length > 1 || fromA === toA && inserted.length === 0) return;
+    const insertedText = inserted.toString();
+    if (!/^[\w:-]?$/.test(insertedText)) return;
 
     const tagName = tagNameAround(transaction.startState, fromA);
     if (!tagName || fromA < tagName.from || toA > tagName.to) return;
@@ -230,7 +231,7 @@ const htmlTagNameSync = EditorState.transactionFilter.of((transaction) => {
     mirrored.push({
       from: peer.from + fromOffset,
       to: peer.from + toOffset,
-      insert: inserted.toString(),
+      insert: insertedText,
     });
   });
 
