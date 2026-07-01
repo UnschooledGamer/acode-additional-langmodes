@@ -14,6 +14,7 @@ export const {
 	foldService,
 	flatIndent,
 	getIndentation,
+	indentUnit,
 	getIndentUnit,
 	indentString,
 	indentNodeProp,

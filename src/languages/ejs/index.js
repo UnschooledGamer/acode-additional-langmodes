@@ -6,6 +6,8 @@ import {
   foldInside,
   foldNodeProp,
   foldService,
+  getIndentation,
+  indentUnit,
   indentNodeProp,
   indentService,
   LRLanguage,
@@ -128,9 +130,41 @@ function ejsIndentAt(state, pos, simulatedBreak) {
   }
 
   const opener = stack[stack.length - 1];
-  return opener ? columnAt(state, opener.from + 2) : 0;
+  return opener ? columnAt(state, opener.from + 2) : null;
 }
 
+function maskRangeForHtml(chars, from, to) {
+  for (let index = from; index < to; index++) {
+    if (chars[index] !== "\n") chars[index] = " ";
+  }
+}
+
+function htmlDocumentForIndent(state) {
+  const chars = state.doc.toString().split("");
+  syntaxTree(state).iterate({
+    enter(node) {
+      if (node.name === "EjsExpression" || node.name === "EjsBlock" ||
+          node.name === "EjsComment" || node.name === "EscapedTag") {
+        maskRangeForHtml(chars, node.from, node.to);
+        return false;
+      }
+      return undefined;
+    }
+  });
+  return chars.join("");
+}
+
+function htmlIndentAt(state, pos) {
+  const htmlState = EditorState.create({
+    doc: htmlDocumentForIndent(state),
+    extensions: [
+      htmlSupport,
+      indentUnit.of(state.facet(indentUnit)),
+      EditorState.tabSize.of(state.tabSize),
+    ],
+  });
+  return getIndentation(htmlState, pos);
+}
 function ejsFold(state, lineStart, lineEnd) {
   const blocks = ejsBlocks(state);
   const startIndex = blocks.findIndex((block) => {
@@ -151,7 +185,8 @@ function ejsFold(state, lineStart, lineEnd) {
 }
 
 const ejsIndentService = indentService.of((context, pos) => {
-  return ejsIndentAt(context.state, pos, context.simulatedBreak);
+  const indent = ejsIndentAt(context.state, pos, context.simulatedBreak);
+  return indent ?? htmlIndentAt(context.state, pos);
 });
 const ejsFoldService = foldService.of(ejsFold);
 

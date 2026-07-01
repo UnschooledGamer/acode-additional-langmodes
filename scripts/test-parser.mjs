@@ -271,6 +271,19 @@ function enter(doc, extensions = []) {
 		to: state.doc.line(6).from,
 	});
 }
+{
+	const source = "<main>\n</main>";
+	const state = EditorState.create({
+		doc: source,
+		selection: EditorSelection.cursor(source.indexOf("\n")),
+		extensions: [ejs(), indentUnit.of("  ")],
+	});
+	syntaxTree(state);
+	let transaction = null;
+	insertNewlineAndIndent({ state, dispatch(tr) { transaction = tr; } });
+	const line = transaction.newDoc.lineAt(transaction.newSelection.main.head);
+	assert.equal(line.text, "  ");
+}
 
 
 {
